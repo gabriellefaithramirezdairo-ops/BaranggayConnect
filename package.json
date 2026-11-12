@@ -1,7 +1,7 @@
 {
-  "name": "baranggayconnect",
+  "name": "barangayconnect",
   "version": "1.0.0",
-  "description": "BaranggayConnect website",
+  "description": "BarangayConnect website",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
