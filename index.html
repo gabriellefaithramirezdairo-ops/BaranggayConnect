@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BaranggayConnect</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- NAVIGATION -->
+  <header class="nav">
+    <a class="brand" href="#home"><img class="logo" src="images/logo.png" alt="">BaranggayConnect</a>
+    <nav>
+      <a href="#home" class="active">Home</a>
+      <a href="#services">Services</a>
+      <a href="#" onclick="openBox('trackBox'); return false;">Track Request</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" aria-label="Switch between light and dark mode" title="Light / dark mode"></button>
+    <div class="auth" id="auth">
+      <button class="btn btn-solid" onclick="openBox('loginBox')">LOGIN</button>
+      <button class="btn btn-outline" onclick="openBox('registerBox')">REGISTER</button>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero" id="home">
+    <div class="hero-text">
+      <h1>Welcome to BaranggayConnect! - Your Digital Gateway to Community Services.</h1>
+    </div>
+  </section>
+
+  <!-- SERVICES -->
+  <main class="services" id="services">
+    <article class="card">
+      <span class="icon">&#128196;</span>
+      <div><h3>Barangay Clearance</h3>
+      <button class="btn btn-solid" onclick="openApply('clearance', 'Barangay Clearance')">APPLY NOW</button></div>
+    </article>
+    <article class="card">
+      <span class="icon">&#127963;</span>
+      <div><h3>Certificate of Residency</h3>
+      <button class="btn btn-solid" onclick="openApply('residency', 'Certificate of Residency')">APPLY NOW</button></div>
+    </article>
+    <article class="card">
+      <span class="icon">&#127970;</span>
+      <div><h3>Business Permit</h3>
+      <button class="btn btn-solid" onclick="openApply('business', 'Business Permit')">APPLY NOW</button></div>
+    </article>
+    <article class="card">
+      <span class="icon">&#129309;</span>
+      <div><h3>Indigency Certificate</h3>
+      <button class="btn btn-solid" onclick="openApply('indigency', 'Indigency Certificate')">APPLY NOW</button></div>
+    </article>
+    <article class="card">
+      <span class="icon">&#128269;</span>
+      <div><h3>Request Status Tracking</h3>
+      <button class="btn btn-solid" onclick="openBox('trackBox')">CHECK STATUS</button></div>
+    </article>
+    <article class="card">
+      <span class="icon">&#128737;</span>
+      <div><h3>Complaint Blotter</h3>
+      <button class="btn btn-solid" onclick="openApply('blotter', 'Complaint Blotter')">FILE REPORT</button></div>
+    </article>
+  </main>
+
+  <!-- FOOTER -->
+  <footer id="contact">
+    <div class="footer-grid">
+      <div>
+        <h4>Baranggay Contact</h4>
+        <p>&#128205; 2601 Paulino Street,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Baranggay, Philippines</p>
+        <p>&#128222; (+63) 945-473-5312</p>
+        <p>&#9993; baranggayconnect.com</p>
+      </div>
+      <iframe title="Barangay map" loading="lazy"
+        src="https://www.openstreetmap.org/export/embed.html?bbox=120.967787%2C14.633290%2C120.969387%2C14.634090&layer=mapnik&marker=14.633690%2C120.968587"></iframe>
+      <div>
+        <h4>Social Media</h4>
+        <p><a href="#">Facebook</a></p>
+        <p><a href="#">Instagram</a></p>
+      </div>
+    </div>
+    <div class="copyright"><span>Copyright &copy; 2026 BaranggayConnect</div>
+  </footer>
+
+  <!-- LOGIN POPUP -->
+  <dialog id="loginBox">
+    <h2>Log in</h2>
+    <label for="loginEmail">Email</label>
+    <input id="loginEmail" type="email">
+    <label for="loginPassword">Password</label>
+    <div class="pw-wrap">
+      <input id="loginPassword" type="password">
+      <button type="button" class="pw-toggle" onclick="togglePassword('loginPassword', this)" aria-label="Show or hide password">Show</button>
+    </div>
+    <p class="msg" id="loginMsg"></p>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeBox('loginBox')">CLOSE</button>
+      <button class="btn btn-solid" onclick="loginUser()">LOGIN</button>
+    </div>
+  </dialog>
+
+  <!-- REGISTER POPUP -->
+  <dialog id="registerBox">
+    <h2>Create an account</h2>
+    <label for="regName">Full name</label>
+    <input id="regName" type="text">
+    <label for="regEmail">Email</label>
+    <input id="regEmail" type="email">
+    <label for="regPassword">Password (6+ characters)</label>
+    <div class="pw-wrap">
+      <input id="regPassword" type="password">
+      <button type="button" class="pw-toggle" onclick="togglePassword('regPassword', this)" aria-label="Show or hide password">Show</button>
+    </div>
+    <p class="msg" id="regMsg"></p>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeBox('registerBox')">CLOSE</button>
+      <button class="btn btn-solid" onclick="registerUser()">REGISTER</button>
+    </div>
+  </dialog>
+
+  <!-- APPLY POPUP -->
+  <dialog id="applyBox">
+    <h2 id="applyTitle">Apply</h2>
+    <div id="applyLookup">
+      <p>Enter your name and contact number to check whether you already filed this request.</p>
+      <label for="applyName">Full name</label>
+      <input id="applyName" type="text">
+      <label for="applyContact">Contact number</label>
+      <input id="applyContact" type="tel">
+      <p class="msg" id="lookupMsg"></p>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="closeBox('applyBox')">CLOSE</button>
+        <button class="btn btn-solid" onclick="checkExistingRequest()">CHECK</button>
+      </div>
+    </div>
+    <div id="applyForm" hidden>
+      <label for="applyDetails">Purpose / details</label>
+      <textarea id="applyDetails" rows="3"></textarea>
+      <p class="msg" id="applyMsg"></p>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="closeBox('applyBox')">CLOSE</button>
+        <button class="btn btn-solid" onclick="submitRequest()">SUBMIT</button>
+      </div>
+    </div>
+    <div id="applyDuplicate" hidden>
+      <p class="msg ok" id="duplicateMsg"></p>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="closeBox('applyBox')">CLOSE</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- TRACK POPUP -->
+  <dialog id="trackBox">
+    <h2>Track your request</h2>
+    <label for="trackRef">Reference number</label>
+    <input id="trackRef" type="text" placeholder="BC-XXXXXX">
+    <p class="msg" id="trackMsg"></p>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeBox('trackBox')">CLOSE</button>
+      <button class="btn btn-solid" onclick="trackRequest()">CHECK STATUS</button>
+    </div>
+  </dialog>
+
+  <script src="script.js"></script>
+</body>
+</html>
