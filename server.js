@@ -1,4 +1,4 @@
-// BaranggayConnect server (MySQL)
+// BarangayConnect server (MySQL)
 var express = require('express');
 var bcrypt = require('bcryptjs');
 var mysql = require('mysql2/promise');
@@ -8,7 +8,7 @@ var app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
  
-// Configure MySQL-compatible database with environment variables.
+// Configure TiDB Cloud or another MySQL-compatible database with environment variables.
 var databaseUrl = process.env.DATABASE_URL;
 var dbHost;
 var dbConfig;
@@ -148,7 +148,7 @@ app.post('/api/requests', async function (req, res) {
     return res.status(400).json({ error: 'Please enter your name and contact number.' });
   }
 
-  // make a reference number like
+  // make a reference number like BC-LX3K9A
   var reference = 'BC-' + Date.now().toString(36).toUpperCase();
  
   try {
