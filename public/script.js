@@ -62,7 +62,7 @@ async function sendToServer(url, method, data) {
   if (data) {
     options.body = JSON.stringify(data);
   }
-  var response = await fetch("http://localhost:3000" + url, options);
+  var response = await fetch(url, options);
   var result = await response.json();
   if (!response.ok) {
     throw new Error(result.error);
