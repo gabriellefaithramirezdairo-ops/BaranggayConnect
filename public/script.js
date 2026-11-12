@@ -1,4 +1,4 @@
-// BaranggayConnect front-end
+// BarangayConnect front-end
 
 var currentService = ""; // code of the service the user is applying for
 
