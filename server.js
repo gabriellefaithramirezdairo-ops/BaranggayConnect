@@ -2,18 +2,55 @@
 var express = require('express');
 var bcrypt = require('bcryptjs');
 var mysql = require('mysql2/promise');
+var path = require('path');
  
 var app = express();
 app.use(express.json());
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
  
-// connect to MySQL - change these to match your computer
-var db = mysql.createPool({
-  host: 'localhost',
-  user: 'root',
-  password: '',
-  database: 'barangay_db'
-});
+// Configure MySQL-compatible database with environment variables.
+var databaseUrl = process.env.DATABASE_URL;
+var dbHost;
+var dbConfig;
+
+if (databaseUrl) {
+  var parsedDatabaseUrl = new URL(databaseUrl);
+  if (parsedDatabaseUrl.protocol !== 'mysql:' && parsedDatabaseUrl.protocol !== 'mysql2:') {
+    throw new Error('DATABASE_URL must use the mysql:// or mysql2:// protocol.');
+  }
+  dbHost = parsedDatabaseUrl.hostname;
+  dbConfig = {
+    host: dbHost,
+    port: Number(parsedDatabaseUrl.port) || 3306,
+    user: decodeURIComponent(parsedDatabaseUrl.username),
+    password: decodeURIComponent(parsedDatabaseUrl.password),
+    database: decodeURIComponent(parsedDatabaseUrl.pathname.replace(/^\/+/, ''))
+  };
+} else {
+  dbHost = process.env.DB_HOST || 'localhost';
+  dbConfig = {
+    host: dbHost,
+    port: Number(process.env.DB_PORT) || 3306,
+    user: process.env.DB_USER || 'root',
+    password: process.env.DB_PASSWORD || '',
+    database: process.env.DB_NAME || 'barangay_db'
+  };
+}
+
+var sslSetting = process.env.DB_SSL;
+if (sslSetting && sslSetting !== 'true' && sslSetting !== 'false') {
+  throw new Error('DB_SSL must be set to "true" or "false".');
+}
+var useTls = sslSetting === 'true' ||
+  (sslSetting !== 'false' && dbHost !== 'localhost' && dbHost !== '127.0.0.1');
+if (useTls) {
+  dbConfig.ssl = { rejectUnauthorized: true };
+  if (process.env.DB_SSL_CA) {
+    dbConfig.ssl.ca = process.env.DB_SSL_CA;
+  }
+}
+
+var db = mysql.createPool(dbConfig);
  
 // REGISTER
 app.post('/api/register', async function (req, res) {
@@ -111,7 +148,7 @@ app.post('/api/requests', async function (req, res) {
     return res.status(400).json({ error: 'Please enter your name and contact number.' });
   }
 
-  // make a reference number like BC-LX3K9A
+  // make a reference number like
   var reference = 'BC-' + Date.now().toString(36).toUpperCase();
  
   try {
@@ -157,7 +194,8 @@ app.get('/api/requests/:reference', async function (req, res) {
   }
 });
  
-app.listen(3000, function () {
-  console.log('Server running at http://localhost:3000');
+var port = Number(process.env.PORT) || 3000;
+app.listen(port, function () {
+  console.log('Server running on port ' + port);
 });
  
