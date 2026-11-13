@@ -23,8 +23,39 @@
     <div class="auth" id="auth">
       <button class="btn btn-solid" onclick="openBox('loginBox')">LOGIN</button>
       <button class="btn btn-outline" onclick="openBox('registerBox')">REGISTER</button>
+      <span class="auth-msg" id="authMsg" role="status" aria-live="polite" hidden></span>
     </div>
   </header>
+
+  <section class="admin-panel" id="adminPanel" aria-labelledby="adminHeading" hidden>
+    <div class="admin-panel-header">
+      <div>
+        <h2 id="adminHeading">Service request management</h2>
+        <p>Review requests, update their status, or remove a request.</p>
+      </div>
+      <button class="btn btn-outline" type="button" onclick="closeAdminPanel()">CLOSE</button>
+    </div>
+    <p class="msg" id="adminMsg" role="status" aria-live="polite"></p>
+    <div class="admin-table-wrap">
+      <table class="admin-table" aria-label="Service requests">
+        <thead>
+          <tr>
+            <th scope="col">Reference</th>
+            <th scope="col">Service</th>
+            <th scope="col">Applicant</th>
+            <th scope="col">Contact</th>
+            <th scope="col">Details</th>
+            <th scope="col">Status</th>
+            <th scope="col">Submitted</th>
+            <th scope="col">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="adminRequestsBody">
+          <tr><td colspan="8">Sign in as an administrator to view requests.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
 
   <!-- HERO -->
   <section class="hero" id="home">
