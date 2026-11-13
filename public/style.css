@@ -57,6 +57,23 @@ h1 { font-family: "Times New Roman", Times, serif; font-size: 30px; line-height:
 .card h3 { font-size: 17px; font-weight: 500; margin-bottom: 8px; }
 .card .btn { width: 100%; min-height: 40px; padding: 9px 12px; border-radius: 4px; }
 
+.auth-msg { max-width: 180px; color: #ffd1d1; font-size: 12px; }
+.admin-panel { max-width: 1200px; margin: 24px auto; padding: 20px; background: var(--surface); color: var(--ink); border-radius: 12px; box-shadow: 0 6px 18px rgba(20,40,100,.14); }
+.admin-panel[hidden] { display: none; }
+.admin-panel-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
+.admin-panel-header h2 { color: var(--navy); font-size: 22px; margin-bottom: 6px; }
+.admin-panel-header p { line-height: 1.5; }
+.admin-table-wrap { overflow-x: auto; }
+.admin-table { width: 100%; min-width: 940px; border-collapse: collapse; font-size: 14px; }
+.admin-table th, .admin-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+.admin-table th { background: var(--card-top); color: var(--navy); }
+.admin-table td:nth-child(5) { max-width: 240px; overflow-wrap: anywhere; }
+.admin-table select { max-width: 160px; padding: 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--page); color: var(--ink); }
+.admin-actions { display: flex; gap: 8px; }
+.admin-actions .btn { padding: 8px 10px; white-space: nowrap; }
+.admin-actions .admin-delete { border-color: var(--red); color: var(--err); }
+.admin-actions .admin-delete:hover { background: var(--outline-hover); }
+
 footer { width: 100%; background: var(--blue-dark); color: #fff; margin-top: 40px; }
 .footer-grid { max-width: 1010px; margin: 0 auto; padding: 28px 20px; display: grid; grid-template-columns: 1fr 1.2fr .8fr; gap: 40px; align-items: start; }
 footer h4 { font-size: 19px; font-weight: 500; margin-bottom: 14px; }
@@ -87,6 +104,8 @@ dialog input, dialog textarea { width: 100%; padding: 10px; border: 1px solid va
   .brand { min-width: 0; font-size: clamp(18px, 5vw, 24px); }
   .nav nav { gap: clamp(12px, 4vw, 30px); }
   .auth { gap: 8px; }
+  .admin-panel { margin: 16px; padding: 16px; }
+  .admin-panel-header { align-items: center; }
   .hero::before, .hero::after { width: 20%; }
   h1 { font-size: 22px; }
 }
