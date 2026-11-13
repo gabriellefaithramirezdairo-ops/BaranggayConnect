@@ -59,7 +59,7 @@ var sessionSecret = process.env.SESSION_SECRET;
 if (!sessionSecret || sessionSecret.length < 32) {
   throw new Error('SESSION_SECRET must be set to a random value of at least 32 characters.');
 }
-var sessionStore = new MySQLStore(dbConfig);
+var sessionStore = new MySQLStore({}, db);
 app.use(session({
   name: 'barangayconnect.sid',
   secret: sessionSecret,
