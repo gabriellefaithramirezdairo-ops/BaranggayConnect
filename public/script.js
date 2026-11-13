@@ -366,21 +366,9 @@ function showExistingRequest(result) {
   document.getElementById("applyLookup").hidden = true;
   document.getElementById("applyForm").hidden = true;
   document.getElementById("applyDuplicate").hidden = false;
-  var message =
+  document.getElementById("duplicateMsg").textContent =
     "You have already filed this request. Reference number: " + result.reference +
     ". Status: " + result.status + ".";
-  var service = document.getElementById("applyTitle").textContent.replace(/^Apply:\s*/, "");
-  if (typeof result.status === "string" && result.status.toLowerCase() === "completed") {
-    message += " " + completedRequestMessage(service);
-  }
-  document.getElementById("duplicateMsg").textContent = message;
-}
-
-function completedRequestMessage(service) {
-  if (service.toLowerCase().indexOf("complaint blotter") !== -1) {
-    return "You can now go to your barangay to get an update or a copy of your complaint blotter.";
-  }
-  return "You can now go to your barangay to get your " + service + ".";
 }
 
 async function checkExistingRequest() {
@@ -427,11 +415,7 @@ async function trackRequest() {
   var ref = document.getElementById("trackRef").value;
   try {
     var result = await sendToServer("/api/requests/" + ref, "GET");
-    var message = result.service + " - Status: " + result.status;
-    if (typeof result.status === "string" && result.status.toLowerCase() === "completed") {
-      message += ". " + completedRequestMessage(result.service);
-    }
-    showMessage("trackMsg", message, false);
+    showMessage("trackMsg", result.service + " - Status: " + result.status, false);
   } catch (error) {
     showMessage("trackMsg", error.message, true);
   }
