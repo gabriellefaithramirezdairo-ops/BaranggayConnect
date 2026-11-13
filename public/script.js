@@ -63,9 +63,18 @@ async function sendToServer(url, method, data) {
     options.body = JSON.stringify(data);
   }
   var response = await fetch(url, options);
-  var result = await response.json();
+  var responseText = await response.text();
+  var result;
+  try {
+    result = responseText ? JSON.parse(responseText) : {};
+  } catch (error) {
+    if (response.status === 403) {
+      throw new Error("The server blocked this API request (403 Forbidden). Verify that the site is deployed with its Express API, not as a static-only site.");
+    }
+    throw new Error("The API returned an unexpected response (HTTP " + response.status + "). Verify the server deployment and API routes.");
+  }
   if (!response.ok) {
-    throw new Error(result.error);
+    throw new Error(result.error || "Request failed (HTTP " + response.status + ").");
   }
   return result;
 }
@@ -84,16 +93,71 @@ function togglePassword(inputId, button) {
   }
 }
 
-function showLoggedIn(name) {
-  document.getElementById("auth").innerHTML =
-    "<span>Hello, " + name + "</span> " +
-    "<button class='btn btn-outline' onclick='logoutUser()'>LOGOUT</button>";
+function clearAuthControls() {
+  var auth = document.getElementById("auth");
+  var status = document.getElementById("authMsg");
+  while (auth.firstChild) {
+    auth.removeChild(auth.firstChild);
+  }
+  auth.appendChild(status);
 }
 
-function logoutUser() {
-  document.getElementById("auth").innerHTML =
-    "<button class='btn btn-solid' onclick=\"openBox('loginBox')\">LOGIN</button>" +
-    "<button class='btn btn-outline' onclick=\"openBox('registerBox')\">REGISTER</button>";
+function setAuthMessage(text) {
+  var status = document.getElementById("authMsg");
+  status.textContent = text;
+  status.hidden = !text;
+}
+
+function showLoggedOut() {
+  clearAuthControls();
+  setAuthMessage("");
+  var status = document.getElementById("authMsg");
+  var loginButton = document.createElement("button");
+  loginButton.className = "btn btn-solid";
+  loginButton.textContent = "LOGIN";
+  loginButton.addEventListener("click", function () { openBox("loginBox"); });
+
+  var registerButton = document.createElement("button");
+  registerButton.className = "btn btn-outline";
+  registerButton.textContent = "REGISTER";
+  registerButton.addEventListener("click", function () { openBox("registerBox"); });
+
+  var auth = document.getElementById("auth");
+  auth.insertBefore(loginButton, status);
+  auth.insertBefore(registerButton, status);
+}
+
+function showLoggedIn(user) {
+  clearAuthControls();
+  setAuthMessage("");
+  var auth = document.getElementById("auth");
+  var greeting = document.createElement("span");
+  greeting.textContent = "Hello, " + user.full_name;
+  auth.insertBefore(greeting, document.getElementById("authMsg"));
+
+  if (user.role === "admin") {
+    var adminButton = document.createElement("button");
+    adminButton.className = "btn btn-outline";
+    adminButton.textContent = "ADMIN REQUESTS";
+    adminButton.addEventListener("click", openAdminPanel);
+    auth.insertBefore(adminButton, document.getElementById("authMsg"));
+  }
+
+  var logoutButton = document.createElement("button");
+  logoutButton.className = "btn btn-outline";
+  logoutButton.textContent = "LOGOUT";
+  logoutButton.addEventListener("click", logoutUser);
+  auth.insertBefore(logoutButton, document.getElementById("authMsg"));
+}
+
+async function logoutUser() {
+  try {
+    await sendToServer("/api/logout", "POST");
+    document.getElementById("adminPanel").hidden = true;
+    showLoggedOut();
+  } catch (error) {
+    setAuthMessage(error.message);
+  }
 }
 
 async function loginUser() {
@@ -101,7 +165,7 @@ async function loginUser() {
   var password = document.getElementById("loginPassword").value;
   try {
     var result = await sendToServer("/api/login", "POST", { email: email, password: password });
-    showLoggedIn(result.full_name);
+    showLoggedIn(result.user);
     closeBox("loginBox");
   } catch (error) {
     showMessage("loginMsg", error.message, true);
@@ -116,10 +180,169 @@ async function registerUser() {
   };
   try {
     var result = await sendToServer("/api/register", "POST", data);
-    showLoggedIn(result.full_name);
+    showLoggedIn(result.user);
     closeBox("registerBox");
   } catch (error) {
     showMessage("regMsg", error.message, true);
+  }
+}
+
+async function restoreLogin() {
+  try {
+    var result = await sendToServer("/api/me", "GET");
+    if (result.user) {
+      showLoggedIn(result.user);
+    } else {
+      showLoggedOut();
+    }
+  } catch (error) {
+    showLoggedOut();
+    setAuthMessage(error.message || "Could not restore sign-in. Please log in again.");
+    console.error(error);
+  }
+}
+
+restoreLogin();
+
+// ---------- administrator request management ----------
+
+var adminRequestStatuses = ["Received", "In Review", "Approved", "Rejected", "Completed"];
+
+function showAdminMessage(text, isError) {
+  var message = document.getElementById("adminMsg");
+  message.textContent = text || "";
+  message.className = text ? (isError ? "msg err" : "msg ok") : "msg";
+}
+
+function addAdminCell(row, value) {
+  var cell = document.createElement("td");
+  cell.textContent = value || "—";
+  row.appendChild(cell);
+  return cell;
+}
+
+function formatRequestDate(value) {
+  if (!value) {
+    return "—";
+  }
+  var date = new Date(value);
+  return isNaN(date.getTime()) ? String(value) : date.toLocaleString();
+}
+
+function renderAdminRequests(requests) {
+  var body = document.getElementById("adminRequestsBody");
+  while (body.firstChild) {
+    body.removeChild(body.firstChild);
+  }
+  if (requests.length === 0) {
+    var emptyRow = body.insertRow();
+    var emptyCell = emptyRow.insertCell();
+    emptyCell.colSpan = 8;
+    emptyCell.textContent = "No service requests have been submitted.";
+    return;
+  }
+
+  requests.forEach(function (request) {
+    var row = body.insertRow();
+    addAdminCell(row, request.reference);
+    addAdminCell(row, request.service);
+    addAdminCell(row, request.full_name);
+    addAdminCell(row, request.contact);
+    addAdminCell(row, request.details);
+
+    var statusCell = row.insertCell();
+    var statusSelect = document.createElement("select");
+    statusSelect.setAttribute("aria-label", "Status for request " + request.reference);
+    adminRequestStatuses.forEach(function (status) {
+      var option = document.createElement("option");
+      option.value = status;
+      option.textContent = status;
+      statusSelect.appendChild(option);
+    });
+    statusSelect.value = request.status;
+    statusCell.appendChild(statusSelect);
+    addAdminCell(row, formatRequestDate(request.created_at));
+
+    var actions = row.insertCell();
+    var actionGroup = document.createElement("div");
+    actionGroup.className = "admin-actions";
+    var saveButton = document.createElement("button");
+    saveButton.className = "btn btn-solid";
+    saveButton.type = "button";
+    saveButton.textContent = "SAVE";
+    saveButton.addEventListener("click", function () {
+      updateRequestStatus(request.reference, statusSelect.value);
+    });
+    var deleteButton = document.createElement("button");
+    deleteButton.className = "btn btn-outline admin-delete";
+    deleteButton.type = "button";
+    deleteButton.textContent = "DELETE";
+    deleteButton.addEventListener("click", function () {
+      deleteRequest(request.reference);
+    });
+    actionGroup.appendChild(saveButton);
+    actionGroup.appendChild(deleteButton);
+    actions.appendChild(actionGroup);
+  });
+}
+
+async function loadAdminRequests() {
+  var body = document.getElementById("adminRequestsBody");
+  while (body.firstChild) {
+    body.removeChild(body.firstChild);
+  }
+  var loadingRow = body.insertRow();
+  var loadingCell = loadingRow.insertCell();
+  loadingCell.colSpan = 8;
+  loadingCell.textContent = "Loading requests...";
+  try {
+    var result = await sendToServer("/api/admin/requests", "GET");
+    renderAdminRequests(result.requests);
+    return true;
+  } catch (error) {
+    showAdminMessage(error.message, true);
+    var errorRow = body.insertRow();
+    var errorCell = errorRow.insertCell();
+    errorCell.colSpan = 8;
+    errorCell.textContent = "Requests could not be loaded.";
+    return false;
+  }
+}
+
+async function openAdminPanel() {
+  var panel = document.getElementById("adminPanel");
+  panel.hidden = false;
+  showAdminMessage("", false);
+  panel.scrollIntoView({ behavior: "smooth", block: "start" });
+  await loadAdminRequests();
+}
+
+function closeAdminPanel() {
+  document.getElementById("adminPanel").hidden = true;
+}
+
+async function updateRequestStatus(reference, status) {
+  try {
+    await sendToServer("/api/admin/requests/" + encodeURIComponent(reference), "PATCH", { status: status });
+    if (await loadAdminRequests()) {
+      showAdminMessage("Request " + reference + " status updated to " + status + ".", false);
+    }
+  } catch (error) {
+    showAdminMessage(error.message, true);
+  }
+}
+
+async function deleteRequest(reference) {
+  if (!window.confirm("Delete request " + reference + "? This cannot be undone.")) {
+    return;
+  }
+  try {
+    await sendToServer("/api/admin/requests/" + encodeURIComponent(reference), "DELETE");
+    if (await loadAdminRequests()) {
+      showAdminMessage("Request " + reference + " deleted.", false);
+    }
+  } catch (error) {
+    showAdminMessage(error.message, true);
   }
 }
 
