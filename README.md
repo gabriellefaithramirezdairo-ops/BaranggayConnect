@@ -10,6 +10,7 @@ A responsive web portal that helps residents access barangay services online. Re
   - Check for an existing request before submitting a new one.
   - Submit service requests and receive a reference number.
   - Track a request and view its current status.
+  - Track a request and view its current status.
   - Use the interface on mobile and desktop, with light and dark themes.
   - View barangay contact details and an embedded map.
 
@@ -20,3 +21,8 @@ A responsive web portal that helps residents access barangay services online. Re
   - `bcryptjs` for password hashing
   - Google Maps embed for the location map
   - Render for web hosting
+
+# - **Admin request management:**
+  - Available statuses are Received, In Review, Approved, Rejected, and Completed.
+  - Newly registered accounts are residents. To grant admin access, register the account first, then promote it directly in the database with `UPDATE users SET role = 'admin' WHERE email = 'admin@example.com';`.
+ 
