@@ -22,7 +22,4 @@ A responsive web portal that helps residents access barangay services online. Re
   - Google Maps embed for the location map
   - Render for web hosting
 
-# - **Admin request management:**
-  - Available statuses are Received, In Review, Approved, Rejected, and Completed.
-  - Newly registered accounts are residents. To grant admin access, register the account first, then promote it directly in the database with `UPDATE users SET role = 'admin' WHERE email = 'admin@example.com';`.
  
