@@ -27,7 +27,7 @@ body::before {
 .nav { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 16px 36px; background: var(--blue-dark); position: sticky; top: 0; z-index: 10; flex-wrap: wrap; }
 .brand { display: flex; align-items: center; gap: 10px; font-family: "Times New Roman", Times, serif; font-size: 24px; font-weight: 700; color: #fff; text-decoration: none; }
 .logo { width: 46px; height: 46px; object-fit: contain; }
-.nav nav { display: flex; gap: 30px; margin-left: auto; padding: 8px 14px; background: #3b82d0; border-radius: 6px; }
+.nav nav { order: 1; width: 100%; display: flex; justify-content: center; gap: 30px; margin: 0; padding: 8px 14px; background: #3b82d0; border-radius: 6px; }
 .nav nav a { color: var(--ink); text-decoration: none; font-weight: 500; padding: 6px 0; border-bottom: 2px solid transparent; }
 .nav nav a.active, .nav nav a:hover { border-color: var(--navy); color: var(--navy); }
 .auth { display: flex; gap: 12px; align-items: center; }
@@ -80,7 +80,6 @@ dialog input, dialog textarea { width: 100%; padding: 10px; border: 1px solid va
 @media (max-width: 900px) {
   .services { grid-template-columns: repeat(2, 1fr); }
   .footer-grid { grid-template-columns: 1fr; gap: 24px; }
-  .nav nav { order: 3; width: 100%; margin: 0; justify-content: center; }
 }
 @media (max-width: 600px) {
   .services { grid-template-columns: 1fr; }
